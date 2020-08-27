@@ -1,35 +1,18 @@
 function statement (invoice, plays) {
-  let result = `Statement for ${invoice.customer}\n`;
-  const USD = formatToUSD();
-  for (let perf of invoice.performances) {
-    const play = plays[perf.playID];
-    let thisAmount = 0;
-    switch (play.type) {
-      case 'tragedy':
-        thisAmount = 40000;
-        if (perf.audience > 30) {
-          thisAmount += 1000 * (perf.audience - 30);
-        }
-        break;
-      case 'comedy':
-        thisAmount = 30000;
-        if (perf.audience > 20) {
-          thisAmount += 10000 + 500 * (perf.audience - 20);
-        }
-        thisAmount += 300 * perf.audience;
-        break;
-      default:
-        throw new Error(`unknown type: ${play.type}`);
-    }
-    result += ` ${play.name}: ${USD(thisAmount / 100)} (${perf.audience} seats)\n`;
-    // totalAmount += thisAmount;
-  }
   const receipt = generateReceipt(invoice, plays);
   const totalAmount = caculateTotalAmount(receipt)
   const volumeCredits = volumeCreditsFor(invoice, plays);
-  result += `Amount owed is ${USD(totalAmount / 100)}\n`;
+  return generateResult(invoice, receipt, totalAmount, volumeCredits);
+}
+
+function generateResult(invoice, receipt, totalAmount, volumeCredits) {
+  let result = `Statement for ${invoice.customer}\n`;
+  for(let res of receipt) {
+    result += ` ${res.name}: ${USD(res.amount)} (${res.audience} seats)\n`;
+  }
+  result += `Amount owed is ${USD(totalAmount)}\n`;
   result += `You earned ${volumeCredits} credits \n`;
-  return result;
+  return result
 }
 
 function generateReceipt(invoice, plays) {
@@ -70,12 +53,12 @@ function caculateTotalAmount(receipt) {
   return totalAmount
 }
 
-function formatToUSD() {
+function USD(value) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,
-  }).format;
+  }).format(value / 100);
 }
 
 function volumeCreditsFor(invoice, plays) {
