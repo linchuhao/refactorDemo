@@ -1,4 +1,8 @@
 function statement (invoice, plays) {
+  return generateTxt(invoice, plays);
+}
+
+function generateTxt(invoice, plays) {
   const receipt = generateReceipt(invoice, plays);
   const totalAmount = caculateTotalAmount(receipt)
   const volumeCredits = volumeCreditsFor(invoice, plays);
