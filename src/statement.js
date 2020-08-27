@@ -9,6 +9,26 @@ function generateTxt(invoice, plays) {
   return generateResult(invoice, receipt, totalAmount, volumeCredits);
 }
 
+function renderPage(invoice, plays) {
+  const receipt = generateReceipt(invoice, plays)
+  const totalAmount = caculateTotalAmount(receipt) 
+  const volumeCredits = volumeCreditsFor(invoice, plays);
+  let page = `<h1>Statement for ${invoice.customer}</h1>\n`
+  page += generateTable(receipt)
+  page += `<p>Amount owed is <em>${USD(totalAmount)}</em></p>\n`;
+  page += `<p>You earned <em>${volumeCredits}</em> credits</p>\n`;
+  return page
+}
+
+function generateTable(receipt) {
+  let table = '<table>\n'
+  +'<tr><th>play</th><th>seats</th><th>cost</th></tr>';
+  for(let res of receipt) {
+    table += ` <tr><td>${res.name}</td><td>${res.audience}</td><td>${USD(res.amount)}</td></tr>\n`;
+  }
+  return table + "</table>\n"
+}
+
 function generateResult(invoice, receipt, totalAmount, volumeCredits) {
   let result = `Statement for ${invoice.customer}\n`;
   for(let res of receipt) {
@@ -77,4 +97,5 @@ function volumeCreditsFor(invoice, plays) {
 
 module.exports = {
   statement,
+  renderPage,
 };
