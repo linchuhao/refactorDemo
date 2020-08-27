@@ -1,6 +1,5 @@
 function statement (invoice, plays) {
   let totalAmount = 0;
-  let volumeCredits = 0;
   let result = `Statement for ${invoice.customer}\n`;
   const USD = formatToUSD();
   for (let perf of invoice.performances) {
@@ -23,24 +22,13 @@ function statement (invoice, plays) {
       default:
         throw new Error(`unknown type: ${play.type}`);
     }
-    volumeCredits = caculateVolumeCredits(volumeCredits, perf, play);
-    //print line for this order
     result += ` ${play.name}: ${USD(thisAmount / 100)} (${perf.audience} seats)\n`;
     totalAmount += thisAmount;
   }
+  const volumeCredits = volumeCreditsFor(invoice, plays);
   result += `Amount owed is ${USD(totalAmount / 100)}\n`;
   result += `You earned ${volumeCredits} credits \n`;
   return result;
-}
-
-module.exports = {
-  statement,
-};
-function caculateVolumeCredits(volumeCredits, perf, play) {
-  volumeCredits += Math.max(perf.audience - 30, 0);
-  if ('comedy' === play.type)
-    volumeCredits += Math.floor(perf.audience / 5);
-  return volumeCredits;
 }
 
 function formatToUSD() {
@@ -51,3 +39,16 @@ function formatToUSD() {
   }).format;
 }
 
+function volumeCreditsFor(invoice, plays) {
+  let volumeCredits = 0;
+  for (let perf of invoice.performances) {
+    volumeCredits += Math.max(perf.audience - 30, 0);
+    if ('comedy' === plays[perf.playID].type)
+      volumeCredits += Math.floor(perf.audience / 5);
+  }
+  return volumeCredits;
+}
+
+module.exports = {
+  statement,
+};
