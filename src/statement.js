@@ -23,10 +23,7 @@ function statement (invoice, plays) {
       default:
         throw new Error(`unknown type: ${play.type}`);
     }
-    // add volume credits
-    volumeCredits += Math.max(perf.audience - 30, 0);
-    // add extra credit for every ten comedy attendees
-    if ('comedy' === play.type) volumeCredits += Math.floor(perf.audience / 5);
+    volumeCredits = caculateVolumeCredits(volumeCredits, perf, play);
     //print line for this order
     result += ` ${play.name}: ${USD(thisAmount / 100)} (${perf.audience} seats)\n`;
     totalAmount += thisAmount;
@@ -39,6 +36,13 @@ function statement (invoice, plays) {
 module.exports = {
   statement,
 };
+function caculateVolumeCredits(volumeCredits, perf, play) {
+  volumeCredits += Math.max(perf.audience - 30, 0);
+  if ('comedy' === play.type)
+    volumeCredits += Math.floor(perf.audience / 5);
+  return volumeCredits;
+}
+
 function formatToUSD() {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
