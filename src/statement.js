@@ -1,5 +1,4 @@
 function statement (invoice, plays) {
-  let totalAmount = 0;
   let result = `Statement for ${invoice.customer}\n`;
   const USD = formatToUSD();
   for (let perf of invoice.performances) {
@@ -23,8 +22,10 @@ function statement (invoice, plays) {
         throw new Error(`unknown type: ${play.type}`);
     }
     result += ` ${play.name}: ${USD(thisAmount / 100)} (${perf.audience} seats)\n`;
-    totalAmount += thisAmount;
+    // totalAmount += thisAmount;
   }
+  const receipt = generateReceipt(invoice, plays);
+  const totalAmount = caculateTotalAmount(receipt)
   const volumeCredits = volumeCreditsFor(invoice, plays);
   result += `Amount owed is ${USD(totalAmount / 100)}\n`;
   result += `You earned ${volumeCredits} credits \n`;
@@ -38,6 +39,35 @@ function generateReceipt(invoice, plays) {
       receipt.push({name: play.name, audience: perf.audience, amount: calculateAmount(perf, play)});
   }
   return receipt;
+}
+
+function calculateAmount(perf, play) {
+  let amount = 0;
+  if(play.type !== 'tragedy' && play.type !== 'comedy'){
+    throw new Error(`unknown type: ${play.type}`);
+  }
+  if(play.type == 'tragedy'){
+    amount = 40000;
+    if (perf.audience > 30) {
+      amount += 1000 * (perf.audience - 30);
+    }
+  }
+  else if(play.type == 'comedy'){
+    amount = 30000;
+    if (perf.audience > 20) {
+      amount += 10000 + 500 * (perf.audience - 20);
+    }
+    amount += 300 * perf.audience;
+  }
+  return amount
+}
+
+function caculateTotalAmount(receipt) {
+  let totalAmount = 0;
+  for(let res of receipt) {
+    totalAmount += res.amount
+  }
+  return totalAmount
 }
 
 function formatToUSD() {
