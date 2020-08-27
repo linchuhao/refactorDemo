@@ -31,6 +31,15 @@ function statement (invoice, plays) {
   return result;
 }
 
+function generateReceipt(invoice, plays) {
+  let receipt = [];
+  for (let perf of invoice.performances) {
+      const play = plays[perf.playID];
+      receipt.push({name: play.name, audience: perf.audience, amount: calculateAmount(perf, play)});
+  }
+  return receipt;
+}
+
 function formatToUSD() {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
